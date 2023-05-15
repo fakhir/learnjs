@@ -3,6 +3,10 @@
 /*
  * This is a JS refresher for various topics covered in the Mozilla JavaScript guide:
  * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/
+ * 
+ * Reference manuals:
+ * https://developer.mozilla.org/en-US/docs/Web/JavaScript
+ * https://devdocs.io/javascript/
  */
 
 (function() {
@@ -14,7 +18,7 @@
         var a;
 
         if (a === undefined) {
-            // 'b' gets hoisted by its value will remain undefined.
+            // 'b' gets hoisted but its value will remain undefined.
             console.log(`This is ${a} and ${b}`);
             // Below is an error because 'let' and 'const' variables are not hoisted.
             //console.log('The value of c is ' + c);
@@ -133,6 +137,30 @@
         }
     };
 
+    function loopsAndIteration() {
+        let fruits = ['apple', 'strawberry', 'banana', 'mango'];
+
+        for (let i = 0; i < 1; i++) {
+            let j = 0;
+            do {
+                let k = 0;
+                while (k < fruits.length) {
+                    console.log('loops', i, j, k);
+                    k++;
+                }
+                j++;
+            } while (j < 1);
+        }
+
+        for (let i in fruits) {
+            console.log('for in', i);
+        }
+
+        for (let i of fruits) {
+            console.log('for of', i);
+        }
+    };
+
     function labeledLoops() {
         let iterations = [];
         breakOut:
@@ -191,6 +219,12 @@
     };
 
     function operatorsSample() {
+        // JS equality table: https://dorey.github.io/JavaScript-Equality-Table/
+        console.log("Operators 1234 == '1234':", 1234 == '1234');
+        console.log("Operators 1234 === '1234':", 1234 === '1234');
+        console.log("Operators [] == false:", [] == false);
+        console.log("Operators [] === false:", [] === false);
+
         var cars = ['Toyota', 'Honda', 'Nissan'];
         // delete operator can be used to delete an object, an array element, or properties
         delete cars[1];
@@ -363,11 +397,278 @@
         // Equality of Map and Set keys: equality works like ====, +0 and -0 are equal, NaN is equal to itself.
     };
 
+    function objectHandling() {
+        // Object creation using object initializers
+        let car = {
+            make: 'Toyota',
+            5: 'Gears',
+            'model': 'Corolla',
+            year: 2021
+        };
+
+        // Object creation using constructor and new
+        function Car(make, model, year) {
+            this.make = make;
+            this.model = model;
+            this.year = year;
+        }
+        let anotherCar = new Car('Suzuki', 'Cultus', 1999);
+        console.log(anotherCar);
+
+        // Object creation using Object.create
+        var Animal = {
+            type: 'invertebrates',
+            displayType: function() {
+                console.log(this.type);
+            },
+            // This way to define a method also works
+            displayTypeUpper() {
+                console.log(this.type.toUpperCase());
+            }
+        };
+        var animal1 = Object.create(Animal);
+        animal1.displayType();
+        var animal2 = Object.create(Animal);
+        animal2.type = "fish";
+        animal2.displayTypeUpper();
+
+        // Here animal2.toString() is called to convert its key into a string.
+        animal1[animal2] = 'the key is an object which first gets converted toString';
+        console.log(animal1);
+
+        // Enumerating properties of an object.
+
+        anotherCar[car] = 'object ref';
+        anotherCar[2] = 3.14;
+
+        // Method 1: for..in loops -- enumerable properties of both object and its prototype chain.
+        for (let i in anotherCar)
+            console.log('Enum with for..i:', i);
+
+        // Method 2: Object.keys(myObj) -- enumerable of properties of object but not its prototype chain.
+        console.log('Enum with Object.keys():', Object.keys(anotherCar));
+
+        // Method 3: Object.getOwnPropertyNames(myObj) -- enum + non-enumerable property names
+        console.log('Enum with Object.getOwnPropertyNames():', Object.getOwnPropertyNames(anotherCar));
+
+        // Adding a property to all instances of an object.
+        Car.prototype.color = 'red';
+        console.log('Color:', anotherCar.color);
+        Car.prototype.show = function() {
+            console.log('Show:', this.make, this.model, this.type);
+        }
+        anotherCar.show();
+
+        // Adding getters/setters
+        const myObj = {
+            a: 0,
+            get b() { return this.a + 1; },
+            set c(x) { this.a = x / 2; },
+            showMe() { console.log(this.a); },
+        };
+
+        Object.defineProperties(myObj, {
+           y: {
+            get() { return this.a + 2; }
+           },
+           z: {
+            set(x) { this.a = x * 2; }
+           }
+        });
+
+        myObj.a = 10;
+        console.log('Getter/setter:', myObj.b); // 11
+        myObj.c = 50;
+        console.log('Getter/setter:', myObj.b); // 26
+        myObj.z = 50;
+        console.log('Getter/setter:', myObj.y); // 102
+        myObj.showMe();
+
+        // Two objects are never equal.
+        const fruit = { name: "apple" };
+        const fruitbear = { name: "apple" };
+
+        fruit == fruitbear; // false
+        fruit === fruitbear; // false
+
+        // Prototypes are a powerful concept similar to inheritance.
+        //
+        // - A property is first searched in an object and then in its
+        //   prototype and then in its prototype. An object may shadow a prop.
+        // - The prototype of an object is stored in a property such as
+        //   __proto__ but the name is not standard. Use Object.getPrototypeOf
+        //   to look up the prototype.
+        // - Prototype of an object can be set using these methods:
+        //   - By using Object.create(), the parameter to create gets set
+        //     as the object's prototype.
+        //   - By a constructor function for which the "prototype" property
+        //     of the constructor function is set appropriately. Such as
+        //     follows: Object.assign(Person.prototype, personPrototype);
+        // - Data properties are usually set within the constructor and are
+        //   the object's "own" properties. Whereas methods are shared between
+        //   all instances of the object, so they are not own properties and
+        //   are set within the prototype.
+        console.log('Prototype of:', Object.getPrototypeOf(anotherCar));
+        const myDate = new Date();
+        let myobj = myDate;
+        do {
+            myobj = Object.getPrototypeOf(myobj);
+            console.log('Get prototype of date:', myobj);
+        } while (myobj);
+    };
+
+    function classAndInheritance() {
+        // Class declarations are not hoisted
+        // There is also the expression syntax: const MyClass = class { ... };
+        class MyStudent {
+            #bloodGroup; // Uninitialized private field
+            constructor(name) {
+                this.name = name;
+                this.homeworkDone = false;
+                this.#bloodGroup = "o+";
+                // Don't return any value from the constructor since it would
+                // then become the result of the new operator.
+            }
+            // Instance field (set as this.school in constructor also)
+            school = "Govt. High School";
+            age = 10;
+            // Instance method (old style was to set MyStudent.prototype.doHomework)
+            // - A method can access private fields of other instances of the
+            //   same class, but not of other classes. E.g. may pass another
+            //   instance as a parameter to the method, for comparison.
+            doHomework() {
+                this.homeworkDone = true;
+            }
+            setAge(age) {
+                if (age < 0 || age > 110) {
+                    throw new RangeError('Invalid age value');
+                }
+                this.age = age;
+            }
+            getAge() { return this.age; }
+            toString() { return this.name; }
+            // Static field (common to all instances, old style was to set MyStudent.species)
+            static species = "human";
+            static goToHome() {
+                console.log('Going home...');
+            }
+            // Static block with static initialization code.
+            static {
+                // ...
+            }
+            // Private fields, methods, static fields/methods
+            #gender = "male";
+        }
+
+        let fred = new MyStudent('fred');
+        fred.setAge(20);
+        console.log('MyStudent age:', fred.getAge());
+
+        // Inheritance
+        // - Derived classes don't have access to parent's private fields.
+        // - A class can only extend from one class.
+        class MyGraduatedStudent extends MyStudent {
+            #graduationYear;
+            constructor(name, graduationYear) {
+                super(name);
+                this.#graduationYear = graduationYear;
+            }
+            get graduationYear() { return this.#graduationYear; }
+            set graduationYear(x) { this.#graduationYear = x; }
+            // Overriding class method here but even static methods can be overridden
+            toString() { return `${super.toString()}/${this.#graduationYear}`; }
+        }
+
+        let grad = new MyGraduatedStudent('Javaid', 1940);
+        console.log('MyGraduateStudent year:', grad.toString(), grad.graduationYear);
+    }
+
+    function promiseChaining() {
+        // doSomething()
+        //      .then((result) => doSomethingElse(result))
+        //      .then((newResult) => doThirdThing(newResult))
+        //      .then((finalResult) => console.log(`Got the final result: ${finalResult}`))
+        //      .catch(failureCallback);
+        //
+        // - Either use a promise chain, or better to use async/await instead.
+        // - .catch(failureCallback) is equivalent to .then(null, failureCallback) which
+        //   is usually added to the end of the chain.
+        // - Promise.all(), Promise.allSettled(), Promise.any() allow executing
+        //   multiple promises in parallel.
+        //
+        // Equivalent chains can be built with async/await, which is more
+        // preferred. The doSomething() function remains the same but the
+        // rest of the chain becomes as follows:
+        //
+        // async function foo() {
+        //   try {
+        //     const result = await doSomething();
+        //     const newResult = await doSomethingElse(result);
+        //     const finalResult = await doThirdThing(newResult);
+        //     console.log(`Got the final result: ${finalResult}`);
+        //   } catch (error) {
+        //     failureCallback(error);
+        //   }
+        // }
+
+        function getRandom(seed) {
+            return new Promise(function(resolve, reject) {
+                const randNum = Date.now() + seed;
+                resolve(randNum);
+            })
+        }
+
+        function boundByTen(largeNum) {
+            let smallNum = largeNum %10;
+            if (smallNum >= 8) {
+                const err = new Error('Threshhold exceeded');
+                throw err;
+            }
+            // This is a shortcut for { 'smallNum': smallNum, 'largeNum': largeNum }
+            return { smallNum, largeNum };
+        }
+
+        function evenOrOdd(bothNums) {
+            let isEven = !(bothNums.smallNum % 2);
+            bothNums['isEven'] = isEven;
+            return bothNums;
+        }
+
+        function displayResult(result) {
+            console.log('Promise:', result);
+            return result;
+        }
+
+        function failureCallback(err) {
+            console.log('Promise error:', err);
+            // Error caught so now return a normal number result for next .then().
+            // This is not needed and is optional. Usually the chain ends here
+            // and no further return is needed in the failureCallback.
+            return 10;
+        }
+
+        // Promise chain
+        getRandom(123)
+            .then(boundByTen)
+            .then(evenOrOdd)
+            .then(displayResult)
+            .catch(failureCallback)
+            .then(displayResult);
+
+        // Converting traditional functions to promises: setTimeout
+        const wait = (ms) => new Promise((resolve) => setTimeout(() => resolve('resolved!'), ms));
+
+        wait(2 * 1000)
+            .then((msg) => console.log('Promise setTimeout fulfilled:', msg))
+            .catch(failureCallback);
+    }
+
     variablesSample(10);
     functionHoisting();
     arrayLiterals();
     objectLiterals();
     exceptionHandling();
+    loopsAndIteration();
     labeledLoops();
     functionsSample();
     operatorsSample();
@@ -376,5 +677,8 @@
     regExpSample();
     indexedCollections();
     keyedCollections();
+    objectHandling();
+    classAndInheritance();
+    promiseChaining();
 
 })();

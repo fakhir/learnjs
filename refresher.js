@@ -223,7 +223,7 @@
         console.log("Operators 1234 == '1234':", 1234 == '1234');
         console.log("Operators 1234 === '1234':", 1234 === '1234');
         console.log("Operators [] == false:", [] == false);
-        console.log("Operators [] === false:", [] === false);
+        //console.log("Operators [] === false:", [] === false);
 
         var cars = ['Toyota', 'Honda', 'Nissan'];
         // delete operator can be used to delete an object, an array element, or properties
@@ -508,6 +508,10 @@
         //   the object's "own" properties. Whereas methods are shared between
         //   all instances of the object, so they are not own properties and
         //   are set within the prototype.
+        // - The difference between 'prototype' and '__proto__' is that the
+        //   former is used with functions which act as constructors and which
+        //   are used with the 'new' operator. But the latter is present on
+        //   all objects and not just functions.
         console.log('Prototype of:', Object.getPrototypeOf(anotherCar));
         const myDate = new Date();
         let myobj = myDate;
@@ -663,6 +667,53 @@
             .catch(failureCallback);
     }
 
+    function typedArrays() {
+        // Typed arrays are used to access fixed size binary data and for packing
+        // and unpacking the data.
+        //
+        // DataView can also be used to control endianness which is not mentioned
+        // in the examples below.
+
+        (function multipleViewsIntoSameData() {
+            // Create a 16 bytes buffer
+            const buffer = new ArrayBuffer(16);
+            console.log('Create a buffer of size', buffer.byteLength);
+
+            const int32View = new Int32Array(buffer);
+            for (let i = 0; i < int32View.length; i++) {
+                console.log('Setting int32View index', i, 'to', i * 2);
+                int32View[i] = i * 2;
+            }
+
+            const int16View = new Int16Array(buffer);
+            console.log('Getting int16View values:', int16View);
+        })();
+
+        (function complexDataStructures() {
+            // Consider this data structure:
+            // struct {
+            //   unsigned long id;
+            //   char username[16];
+            //   float amountDue;
+            // }
+
+            const buffer = new ArrayBuffer(24);
+            const idView = new Uint32Array(buffer, 0, 1);
+            const usernameView = new Uint8Array(buffer, 4, 16);
+            const amountDueView = new Float32Array(buffer, 20, 1);
+
+            idView[0] = 1234;
+            usernameView.set([104, 101, 108, 108, 111]);
+            amountDueView[0] = 1.5;
+
+            const rawData = new Uint8Array(buffer);
+            console.log('Raw data:', rawData);
+
+            const normalArray = Array.from(rawData);
+            console.log('Normal array:', normalArray);
+        })();
+    }
+
     variablesSample(10);
     functionHoisting();
     arrayLiterals();
@@ -680,5 +731,6 @@
     objectHandling();
     classAndInheritance();
     promiseChaining();
+    typedArrays();
 
 })();
